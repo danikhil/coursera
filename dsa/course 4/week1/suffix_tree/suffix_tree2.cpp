@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -9,11 +10,12 @@ using std::endl;
 using std::map;
 using std::pair;
 using std::string;
+using std::unordered_map;
 using std::vector;
 
 struct Node
 {
-    map<char, Node> child;
+    map<char, Node *> child;
     int start, end, s_pos;
     bool is_end;
 
@@ -29,11 +31,11 @@ void make_tree(Node *t, int i, int k, int len, const string &text)
     if ((!t->is_end) && t->start == t->end)
     {
         //cout << "I'm here" << '\n';
-        if (t->child.find(text[k]) == t->child.end())
-            t->child.insert({text[k], Node(k, i, k, true)});
+        if ((t->child).find(text[k]) == (t->child).end())
+            t->child[text[k]] = new Node(k, i, k, true);
         else
         {
-            t = &(t->child[text[k]]);
+            t = t->child[text[k]];
             make_tree(t, i, k + 1, len, text);
         }
         return;
@@ -49,29 +51,31 @@ void make_tree(Node *t, int i, int k, int len, const string &text)
     //cout << k << ' ' << j << '\n';
     if (t->is_end)
     {
-        t->child.insert({text[j], Node(j, t->s_pos, t->end, true)});
-        t->child.insert({text[k], Node(k, i, k, true)});
+        t->child[text[j]] = new Node(j, t->s_pos, j, true);
+        t->child[text[k]] = new Node(k, i, k, true);
         t->is_end = false;
         t->end = j - 1;
     }
     else if (j <= t->end)
     {
-        Node child_copy = *t;
-        t->child.clear();
-        child_copy.start = j;
-        t->child.insert({text[j], child_copy});
-        t->child.insert({text[k], Node(k, i, k, true)});
-        t->is_end = false;
+        Node *child_copy = new Node();
+        *child_copy = *t;
+        (t->child).clear();
+        //free(t);
+        child_copy->start = j;
+        t->child[text[j]] = child_copy;
+        t->child[text[k]] = new Node(k, i, k, true);
         t->end = j - 1;
+        t->is_end = false;
     }
     else
     {
         //k = k - j + t->end + 1; //slow method
-        if (t->child.find(text[k]) == t->child.end())
-            t->child.insert({text[k], Node(k, i, k, true)});
+        if ((t->child).find(text[k]) == (t->child).end())
+            t->child[text[k]] = new Node(k, i, k, true);
         else
         {
-            t = &(t->child[text[k]]);
+            t = t->child[text[k]];
             make_tree(t, i, k + 1, len, text);
         }
         return;
@@ -96,7 +100,7 @@ void find_edges(Node *t, vector<string> &result, int fl, const string &text)
     }
     for (auto it = t->child.begin(); it != t->child.end(); ++it)
     {
-        find_edges(&(it->second), result, 1, text);
+        find_edges(it->second, result, 1, text);
     }
 }
 
@@ -105,14 +109,14 @@ vector<string> ComputeSuffixTreeEdges(const string &text)
     vector<string> result;
     // Implement this function yourself
     int len = text.length() - 1;
-    Node trie(-1, -1, -1, false);
+    Node *trie = new Node(-1, -1, -1, false);
     for (int i = 0; i <= len; i++)
     {
         int k = i;
-        Node *t = &trie;
+        Node *t = trie;
         make_tree(t, i, k, len, text);
     }
-    find_edges(&trie, result, 0, text);
+    find_edges(trie, result, 0, text);
     return result;
 }
 

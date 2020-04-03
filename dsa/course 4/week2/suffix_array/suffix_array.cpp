@@ -20,6 +20,22 @@ using std::vector;
 vector<int> BuildSuffixArray(const string& text) {
   vector<int> result;
   // Implement this function yourself
+
+  vector<string> v;
+
+  int l = text.size(),k=1;
+  for(int i=l-1;i>=0;i--)
+  {
+    v.push_back(text.substr(i,k++));
+  }
+
+  sort(v.begin(), v.end());
+
+  for(auto i:v)
+  {
+    int s=i.size();
+    result.push_back(l-s);
+  }
   return result;
 }
 

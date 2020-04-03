@@ -10,9 +10,24 @@ using std::string;
 using std::vector;
 
 string BWT(const string& text) {
-  string result = "";
 
-  // write your code here
+  vector<string> v;
+
+  int l = text.size(),k=1;
+  for(int i=l-1;i>=0;i--)
+  {
+    v.push_back(text.substr(i,k++));
+  }
+
+  sort(v.begin(), v.end());
+
+  string result="";
+
+  for(auto i:v)
+  {
+    int s=i.size();
+    result += text[(2*l-s-1)%l];
+  }
 
   return result;
 }

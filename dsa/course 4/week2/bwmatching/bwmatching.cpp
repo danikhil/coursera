@@ -7,6 +7,7 @@
 #include <vector>
 
 using std::cin;
+using std::cout;
 using std::istringstream;
 using std::map;
 using std::string;
