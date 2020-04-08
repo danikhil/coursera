@@ -6,50 +6,46 @@ struct Clause {
     int secondVar;
 };
 
-struct Node {
-    vector<int> adjlist;
-    int set_value;
-};
-
 struct TwoSatisfiability {
     int numVars;
-    vector<Clause> clauses;
+    vector<int> adjList;
+    vector<int> radjList;
+    vector<int> order, comp;
+    vector<bool> visited,assignment;
 
     TwoSatisfiability(int n, int m) :
-        numVars(n),
-        clauses(m)
+        numVars(n), adjList(2*n), radjList(2*n), comp(2*n)
     {  }
 
-    bool isSatisfiable(vector<int>& result) {
-        // This solution tries all possible 2^n variable assignments.
-        // It is too slow to pass the problem.
-        // Implement a more efficient algorithm here.
-        for (int mask = 0; mask < (1 << numVars); ++mask) {
-            for (int i = 0; i < numVars; ++i) {
-                result[i] = (mask >> i) & 1;
-            }
+    void DFS(int var) {
 
-            bool formulaIsSatisfied = true;
+        int u = var+numVars;
+        visited[abs(var)]=1;
 
-            for (const Clause& clause: clauses) {
-                bool clauseIsSatisfied = false;
-                if (result[abs(clause.firstVar) - 1] == (clause.firstVar < 0)) {
-                    clauseIsSatisfied = true;
-                }
-                if (result[abs(clause.secondVar) - 1] == (clause.secondVar < 0)) {
-                    clauseIsSatisfied = true;
-                }
-                if (!clauseIsSatisfied) {
-                    formulaIsSatisfied = false;
-                    break;
-                }
-            }
+        for(auto i:adjList) {
 
-            if (formulaIsSatisfied) {
-                return true;
-            }
+            int v = i+numVars;
+            if(visited[abs(v)])
+            continue;
+            DFS(var);
         }
-        return false;
+        s.push(-var);
+    }
+
+    bool isSatisfiable(vector<int>& result) {
+
+        visited.assign(numVars,0);
+        for(int i=0;i<numVars;i++)
+        {
+            if(!visited[abs(i)])
+            continue;
+            DFS(i-numVars);
+        }
+        for(int i=0;i<numVars;i++)
+        {
+            result[i]=!graph[numVars+i].set_value;
+        }
+        return var;
     }
 };
 
@@ -60,7 +56,16 @@ int main() {
     cin >> n >> m;
     TwoSatisfiability twoSat(n, m);
     for (int i = 0; i < m; ++i) {
-        cin >> twoSat.clauses[i].firstVar >> twoSat.clauses[i].secondVar;
+
+        int u,v;
+        cin >> u >> v;
+        if(u<0)
+        u=abs(u)+1;
+        if(v<0)
+        v=abs(v)+1;
+        twoSat.adjList[u-1].push_back(v-1);
+        twoSat.adjList[v-1].push_back(v-1);
+        twoSat.radjList[v-1].push_back(u-1);
     }
 
     vector<int> result(n);

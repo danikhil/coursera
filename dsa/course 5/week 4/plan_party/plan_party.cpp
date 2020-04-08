@@ -1,5 +1,5 @@
-#include <iostream>
-#include <vector>
+#include <bits/stdc++.h>
+#include <sys/resource.h>
 
 struct Vertex {
     int weight;
@@ -27,23 +27,40 @@ Graph ReadTree() {
     return tree;
 }
 
-void dfs(const Graph &tree, int vertex, int parent) {
-    for (int child : tree[vertex].children)
-        if (child != parent)
-            dfs(tree, child, vertex);
+int solve(const Graph &tree, int vertex, int parent, Sum &array) {
 
-    // This is a template function for processing a tree using depth-first search.
-    // Write your code here.
-    // You may need to add more parameters to this function for child processing.
+    if(array[vertex]!=-1)
+    return array[vertex];
+    int ans1=tree[vertex].weight;
+    for(auto child: tree[vertex].children)
+    {
+        if(child==parent)
+        continue;
+        for(auto sub_child: tree[child].children)
+        {
+            if(sub_child!=vertex)
+            ans1+=solve(tree,sub_child, child, array);
+        }
+    }
+    int ans2=0;
+    for(auto child:tree[vertex].children)
+    {
+        if(child!=parent)
+        ans2+=solve(tree, child, vertex, array);
+    }
+    array[vertex]=std::max(ans1, ans2);
+    return array[vertex];
 }
 
 int MaxWeightIndependentTreeSubset(const Graph &tree) {
+
     size_t size = tree.size();
+    Sum array(size,-1);
     if (size == 0)
         return 0;
-    dfs(tree, 0, -1);
+    
     // You must decide what to return.
-    return 0;
+    return solve(tree, 0, -1, array);
 }
 
 int main() {
